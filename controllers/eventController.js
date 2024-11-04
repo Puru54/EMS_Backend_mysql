@@ -227,3 +227,50 @@ exports.deleteAllEvents = async (req, res, next) => {
         res.status(500).json({ error: err.message });
     }
 };
+
+// Update tags for an event
+exports.updateEventTags = async (req, res, next) => {
+    try {
+        const eventId = req.params.id;
+        const { tags } = req.body; // Assume tags are passed as an array in the request body
+
+        const event = await Event.findByPk(eventId);
+        if (!event) {
+            return next(new AppError('Event not found', 404));
+        }
+
+        event.tags = tags.join(','); // Convert array to comma-separated string
+        await event.save();
+
+        res.status(200).json({
+            status: 'success',
+            data: { event }
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+// Get events by tags
+exports.getEventsByTags = async (req, res, next) => {
+    try {
+        const { tag } = req.params; // Assume the tag is passed as a URL parameter
+        const events = await Event.findAll({
+            where: {
+                tags: {
+                    [Op.like]: `%${tag}%` // Use Sequelize's Op.like for partial matching
+                }
+            }
+        });
+
+        if (events.length === 0) {
+            return next(new AppError('No events found with this tag', 404));
+        }
+
+        res.status(200).json({ status: 'success', data: events });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+// ... (remaining functions)

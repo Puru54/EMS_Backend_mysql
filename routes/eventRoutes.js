@@ -33,5 +33,14 @@ router
     .get(eventController.getEventStartDate)
 // router.get('/:eventId/participants', eventController.getEventParticipants);
 
+// Route for updating event tags
+router
+    .route('/:id/tags')
+    .patch(authController.protect, authController.restrictTo('eventmanager'), eventController.updateEventTags);
+
+// Route for getting events by tags
+router
+    .route('/tags/:tag')
+    .get(eventController.getEventsByTags);
     
 module.exports = router

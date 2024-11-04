@@ -1,9 +1,16 @@
 const Pricing = require('../models/priceModel');
 const AppError = require('../utils/appError');
+const Event = require('../models/eventModel')
 
 // Create a new pricing scheme
 exports.createPricing = async (req, res) => {
     try {
+        // Check total seats validation before creating
+        await validateTotalSeats(req.body.eventID);
+
+        // Check total pricing count before creating a new pricing scheme
+        const totalPricingCount = await checkTotalPricingCount(req.body.eventID);
+        
         const pricing = await Pricing.create(req.body);
         res.status(201).json({ data: pricing, status: 'success' });
     } catch (err) {
@@ -75,4 +82,24 @@ exports.getPricingsByEventID = async (req, res) => {
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
+};
+
+// Validate total seats against pricing schemes
+const validateTotalSeats = async (eventId) => {
+    const event = await Event.findByPk(eventId);
+    if (!event) {
+        throw new AppError('Event not found', 404);
+    }
+    const pricings = await Pricing.findAll({ where: { eventID: eventId } });
+    const totalPricingSeats = pricings.reduce((total, pricing) => total + pricing.seats, 0);
+    if (totalPricingSeats > event.seats) {
+        throw new AppError('Total seats in pricing schemes exceed available seats for the event', 400);
+    }
+};
+
+// Check total counts of all pricing for an event before adding a new pricing scheme
+const checkTotalPricingCount = async (eventId) => {
+    const pricings = await Pricing.findAll({ where: { eventID: eventId } });
+    const totalPricingCount = pricings.length; // Get the total count of existing pricing schemes
+    return totalPricingCount; // Return the total count
 };
