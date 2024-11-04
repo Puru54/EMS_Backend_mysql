@@ -38,6 +38,16 @@ const Coupon = db.define('Coupon', {
             key: 'pricingId',
         },
         allowNull: false,
+    },
+    usageLimit: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 1, // Set a default usage limit
+    },
+    timesUsed: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0, // Start with zero usages
     }
 });
 

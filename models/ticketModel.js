@@ -42,6 +42,7 @@ const Ticket = db.define('Ticket', {
     ticket_identifier: {
         type: DataTypes.STRING, // This can store a QR code link or a unique identifier
         allowNull: false,
+        unique: true,
     },
     cancel_validity: {
         type: DataTypes.DATE,
