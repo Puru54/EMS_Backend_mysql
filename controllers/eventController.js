@@ -2,16 +2,18 @@ const Event = require('../models/eventModel');
 const AppError = require('../utils/appError');
 const multer = require('multer');
 // const Payment = require('../models/paymentModel');
-const User = require('../models/userModel');
+// const User = require('../models/userModel');
 
 // Multer storage configuration
 const multerStorage = multer.diskStorage({
     destination: (req, file, cb) => {
+        console.log("Multer destination called");
         cb(null, 'views/images/banners/user_uploads'); // Update the folder for event images
     },
     filename: (req, file, cb) => {
         const eventid = req.body.eventid;
         const ext = file.mimetype.split('/')[1];
+        console.log('Event ID in filename:', eventid); // Log to confirm
         cb(null, `event-${eventid}-${Date.now()}.${ext}`);
     }
 });
@@ -32,11 +34,14 @@ const upload = multer({
 });
 
 // Middleware to upload a single image (photo field)
-exports.uploadEventBanner = upload.single('mediaLink');
+exports.uploadEventBanner = upload.single('photo');
 
 // Function to handle image upload and return image URL
 exports.uploadEventImage = async (req, res, next) => {
     try {
+
+        console.log('File:', req.file);
+        console.log('Event ID:', req.body.eventid);
         const imageUrl = 'images/banners/user_uploads/' + req.file.filename;
         const event = await Event.findByPk(req.body.eventid);
         event.media_Links = imageUrl;

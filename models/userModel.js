@@ -32,11 +32,11 @@ const User = db.define('User', {
     allowNull: false,
   },
   address: {
-    type: DataTypes.TEXT, // Standard datatype for addresses used in professional websites
+    type: DataTypes.TEXT,
     allowNull: false,
   },
   nationality: {
-    type: DataTypes.STRING, // New field for nationality
+    type: DataTypes.STRING,
     allowNull: false,
   },
   photo: {
@@ -61,14 +61,34 @@ const User = db.define('User', {
       len: [8, 255],
     },
   },
+  // Virtual field for password confirmation
+  passwordConfirm: {
+    type: DataTypes.VIRTUAL,
+    allowNull: false,
+    validate: {
+      matchPassword(value) {
+        if (value !== this.password) {
+          throw new Error('Passwords do not match');
+        }
+      }
+    },
+  },
+  active: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: true,
+    allowNull: false,
+  },
 }, {
   hooks: {
     beforeCreate: async (user) => {
+      // Hash the password
       user.password = await bcrypt.hash(user.password, 12);
+      user.passwordConfirm = await bcrypt.hash(user.passwordConfirm, 12);
     },
     beforeUpdate: async (user) => {
       if (user.changed('password')) {
         user.password = await bcrypt.hash(user.password, 12);
+        user.passwordConfirm = await bcrypt.hash(user.passwordConfirm, 12);
       }
     },
   },

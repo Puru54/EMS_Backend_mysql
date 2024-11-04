@@ -1,21 +1,22 @@
 const express = require('express')
 const eventController = require('./../controllers/eventController')
+const authController = require('./../controllers/authController')
 const router = express.Router()
 
 router
     .route('/')
-    .post(eventController.createEvent)
+    .post(authController.protect , authController.restrictTo('eventmanager'),eventController.createEvent)
     .get(eventController.getAllEvents)
-    .delete(eventController.deleteAllEvents)
+    .delete(authController.protect , authController.restrictTo('eventmanager'),eventController.deleteAllEvents)
 
 
 router
     .route('/:id')
     .get(eventController.getEvent)
-    .patch(eventController.updateEvent)
-    .delete(eventController.deleteEvent);
+    .patch(authController.protect , authController.restrictTo('eventmanager'),eventController.updateEvent)
+    .delete(authController.protect , authController.restrictTo('eventmanager'),eventController.deleteEvent);
 
-router.put('/updateBanner',eventController.uploadEventBanner, eventController.uploadEventImage)
+router.put('/updateBanner' , eventController.uploadEventBanner, eventController.uploadEventImage)
 
 router
     .route('/availability/:id')
@@ -25,12 +26,11 @@ router
 
 router
     .route('/user/:id')
-    .get(eventController.getAllEventsByCID)
+    .get(authController.protect , authController.restrictTo('eventmanager'),eventController.getAllEventsByCID)
 
 router
     .route('/event/:id')
     .get(eventController.getEventStartDate)
-   
 // router.get('/:eventId/participants', eventController.getEventParticipants);
 
     

@@ -1,6 +1,7 @@
 const { DataTypes } = require('sequelize');
 const db = require('./db');
 const Event = require('./eventModel');
+const User = require('./userModel');
 const Pricing = require('./priceModel');
 
 // Define Ticket model
@@ -9,6 +10,14 @@ const Ticket = db.define('Ticket', {
         type: DataTypes.BIGINT,
         autoIncrement: true,
         primaryKey: true,
+    },
+    userID: {
+        type:DataTypes.BIGINT,
+        references: {
+            model: User,
+            key: 'uid',
+        },
+        allowNull: false
     },
     eventID: {
         type: DataTypes.UUID,

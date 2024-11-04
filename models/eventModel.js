@@ -32,6 +32,9 @@ const Event = db.define('Event', {
         type: DataTypes.STRING,
         allowNull: false,
     },
+    max_purchase:{
+        type: DataTypes.INTEGER,
+    },
     available_seats: {
         type: DataTypes.INTEGER,
     },
@@ -67,14 +70,7 @@ const Event = db.define('Event', {
     },
     media_Links: {
         type: DataTypes.TEXT,
-        defaultValue: 'images/banners/custom-img.jpg',
-        get() {
-            const rawValue = this.getDataValue('media_Links');
-            return rawValue ? rawValue.split(',') : [];
-        },
-        set(value) {
-            this.setDataValue('media_Links', value.join(','));
-        },
+        defaultValue: 'images/banners/custom-img.jpg'
     },
     tags: {
         type: DataTypes.STRING,
@@ -92,7 +88,6 @@ Event.belongsTo(User, {
 async function syncDb() {
     try {
         const tableExists = await db.getQueryInterface().showAllTables();
-
         if (!tableExists.map(table => table.toLowerCase()).includes('events')) {
             await db.sync({ alter: true });
             console.log('Events table created and synchronized');

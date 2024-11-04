@@ -15,11 +15,12 @@ const sequelize = new Sequelize(
             min: 0,
             acquire: 30000,
             idle: 10000
-        }
-    }
+        },
+        logging: false
+    },
 );
 
 // Configure Sequelize to use winston for logging
-sequelize.options.logging = winston.debug;
+// sequelize.options.logging = winston.debug;
 
 module.exports = sequelize;

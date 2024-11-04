@@ -90,7 +90,8 @@ exports.protect = async (req, res, next) => {
 
         const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
 
-        const freshUser = await User.findByPk(decoded.id);
+        // console.log(decoded)
+        const freshUser = await User.findOne({ where: { cid: decoded.id } });
         if (!freshUser) {
             return next(
                 new AppError('The user belonging to this token no longer exists', 401)
@@ -107,7 +108,7 @@ exports.protect = async (req, res, next) => {
 // Update password handler
 exports.updatePassword = async (req, res, next) => {
     try {
-        const user = await User.findByPk(req.user.id);
+        const user = await User.findOne(req.user.id);
 
         if (!(await user.correctPassword(req.body.passwordCurrent))) {
             return next(new AppError('Your current password is incorrect', 401));
