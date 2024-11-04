@@ -20,4 +20,15 @@ router
 // Get all coupons for a specific event
 router.get('/event/:eventID', couponController.getCouponsByEventID);
 
+
+// Apply a coupon code
+router.post('/apply', couponController.applyCoupon); // Apply a coupon code
+
+// Generate multiple coupons
+router.post(
+    '/generate',
+    authController.restrictTo('eventmanager'), 
+    couponController.generateCoupons
+); // Generate multiple coupons (restricted)
+
 module.exports = router;

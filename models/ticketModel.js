@@ -3,6 +3,7 @@ const db = require('./db');
 const Event = require('./eventModel');
 const User = require('./userModel');
 const Pricing = require('./priceModel');
+const Coupon = require('./couponModel'); // Import Coupon model
 
 // Define Ticket model
 const Ticket = db.define('Ticket', {
@@ -12,12 +13,12 @@ const Ticket = db.define('Ticket', {
         primaryKey: true,
     },
     userID: {
-        type:DataTypes.BIGINT,
+        type: DataTypes.BIGINT,
         references: {
             model: User,
             key: 'uid',
         },
-        allowNull: false
+        allowNull: false,
     },
     eventID: {
         type: DataTypes.UUID,
@@ -34,22 +35,34 @@ const Ticket = db.define('Ticket', {
     amount: {
         type: DataTypes.FLOAT,
         allowNull: false,
+        validate: {
+            min: 0, // Ensure the amount is non-negative
+        },
     },
     ticket_validity: {
         type: DataTypes.DATE,
         allowNull: false,
+        defaultValue: DataTypes.NOW, // Default to current date
     },
     ticket_identifier: {
-        type: DataTypes.STRING, // This can store a QR code link or a unique identifier
+        type: DataTypes.STRING,
         allowNull: false,
-        unique: true,
+        unique: true, // Enforce uniqueness
     },
     cancel_validity: {
         type: DataTypes.DATE,
         allowNull: true, // Nullable if cancellation is not allowed
     },
+    couponCode: {
+        type: DataTypes.STRING,
+        references: {
+            model: Coupon,
+            key: 'code',
+        },
+        allowNull: true, // Coupon is optional
+    },
     ticket_details: {
-        type: DataTypes.JSON, // Stores additional details as key-value pairs
+        type: DataTypes.JSON,
         allowNull: true,
         defaultValue: {},
         validate: {
@@ -65,14 +78,8 @@ const Ticket = db.define('Ticket', {
 // Sync database if 'Tickets' table doesn't exist or requires alteration
 async function syncDb() {
     try {
-        const tableExists = await db.getQueryInterface().showAllTables();
-
-        if (!tableExists.map(table => table.toLowerCase()).includes('tickets')) {
-            await db.sync({ alter: true });
-            console.log('Tickets table created and synchronized');
-        } else {
-            console.log('Tickets table already exists. No sync needed.');
-        }
+        await db.sync({ alter: true }); // Synchronize the table schema
+        console.log('Tickets table synchronized');
     } catch (error) {
         console.error('Error during sync:', error);
     }

@@ -1,13 +1,52 @@
 const Ticket = require('../models/ticketModel');
+const Coupon = require('../models/couponModel');
+const Event = require('../models/eventModel');
 const AppError = require('../utils/appError');
 
+// Helper function to check max purchase limit for tickets
+const checkMaxPurchaseLimit = async (eventID, userID, requestedTickets) => {
+    // Retrieve the event and its max_purchase limit
+    const event = await Event.findByPk(eventID);
+
+    if (!event) throw new AppError('Event not found', 404);
+
+    // Check how many tickets the user has already purchased for this event
+    const existingTickets = await Ticket.count({ where: { eventID, userID } });
+
+    // Check if the total exceeds the max_purchase limit
+    if (existingTickets + requestedTickets > event.max_purchase) {
+        throw new AppError(
+            `Cannot purchase more than ${event.max_purchase} tickets for this event.`,
+            400
+        );
+    }
+};
+
 // Create a new ticket
-exports.createTicket = async (req, res) => {
+exports.createTicket = async (req, res, next) => {
     try {
-        const ticket = await Ticket.create(req.body);
-        res.status(201).json({ data: ticket, status: 'success' });
+        const { couponCode, eventID, userID, ticketCount = 1 } = req.body;
+
+        // Check if the coupon code is valid (if provided)
+        let coupon = null;
+        if (couponCode) {
+            coupon = await Coupon.findOne({ where: { code: couponCode, eventID } });
+            if (!coupon) {
+                return next(new AppError('Invalid or expired coupon code', 400));
+            }
+        }
+
+        // Check max purchase limit
+        await checkMaxPurchaseLimit(eventID, userID, ticketCount);
+
+        // Create the tickets based on ticketCount
+        const tickets = await Promise.all(
+            Array(ticketCount).fill().map(() => Ticket.create(req.body))
+        );
+
+        res.status(201).json({ data: tickets, status: 'success' });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        next(err instanceof AppError ? err : new AppError(err.message, 500));
     }
 };
 
