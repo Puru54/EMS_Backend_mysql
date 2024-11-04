@@ -1,0 +1,96 @@
+{
+  level: 'error',
+  message: AppError: Maximum of 5 pricing schemes allowed for this event
+      at exports.createPricing (E:\EMS\EMS_Backend_mysql\controllers\pricingController.js:30:25)
+      at process.processTicksAndRejections (node:internal/process/task_queues:95:5) {
+    statusCode: 400,
+    status: 'fail',
+    isOperational: true
+  },
+  label: 'Event Management Website',
+  timestamp: 'Nov-05-2024 03:41:19'
+}
+{
+  level: 'error',
+  message: AppError: Maximum of 5 pricing schemes allowed for this event
+      at exports.createPricing (E:\EMS\EMS_Backend_mysql\controllers\pricingController.js:30:25)
+      at process.processTicksAndRejections (node:internal/process/task_queues:95:5) {
+    statusCode: 400,
+    status: 'fail',
+    isOperational: true
+  },
+  label: 'Event Management Website',
+  timestamp: 'Nov-05-2024 03:41:19'
+}
+{
+  level: 'error',
+  message: AppError: Maximum of 5 pricing schemes allowed for this event
+      at exports.createPricing (E:\EMS\EMS_Backend_mysql\controllers\pricingController.js:30:25)
+      at process.processTicksAndRejections (node:internal/process/task_queues:95:5) {
+    statusCode: 400,
+    status: 'fail',
+    isOperational: true
+  },
+  label: 'Event Management Website',
+  timestamp: 'Nov-05-2024 03:41:19'
+}
+{
+  level: 'error',
+  message: AppError: Maximum of 5 pricing schemes allowed for this event
+      at exports.createPricing (E:\EMS\EMS_Backend_mysql\controllers\pricingController.js:30:25)
+      at process.processTicksAndRejections (node:internal/process/task_queues:95:5) {
+    statusCode: 400,
+    status: 'fail',
+    isOperational: true
+  },
+  label: 'Event Management Website',
+  timestamp: 'Nov-05-2024 03:41:19'
+}
+{
+  level: 'error',
+  message: AppError: Maximum of 5 pricing schemes allowed for this event
+      at exports.createPricing (E:\EMS\EMS_Backend_mysql\controllers\pricingController.js:30:25)
+      at process.processTicksAndRejections (node:internal/process/task_queues:95:5) {
+    statusCode: 400,
+    status: 'fail',
+    isOperational: true
+  },
+  label: 'Event Management Website',
+  timestamp: 'Nov-05-2024 03:41:20'
+}
+{
+  level: 'error',
+  message: AppError: Total seats in pricing schemes exceed available seats for the event
+      at exports.createPricing (E:\EMS\EMS_Backend_mysql\controllers\pricingController.js:32:25)
+      at process.processTicksAndRejections (node:internal/process/task_queues:95:5) {
+    statusCode: 400,
+    status: 'fail',
+    isOperational: true
+  },
+  label: 'Event Management Website',
+  timestamp: 'Nov-05-2024 03:48:23'
+}
+{
+  level: 'error',
+  message: AppError: Total seats in pricing schemes exceed available seats for the event
+      at exports.createPricing (E:\EMS\EMS_Backend_mysql\controllers\pricingController.js:32:25)
+      at process.processTicksAndRejections (node:internal/process/task_queues:95:5) {
+    statusCode: 400,
+    status: 'fail',
+    isOperational: true
+  },
+  label: 'Event Management Website',
+  timestamp: 'Nov-05-2024 03:48:27'
+}
+{
+  level: 'error',
+  message: AppError: Total seats in pricing schemes exceed available seats for the event
+      at exports.createPricing (E:\EMS\EMS_Backend_mysql\controllers\pricingController.js:32:25)
+      at process.processTicksAndRejections (node:internal/process/task_queues:95:5) {
+    statusCode: 400,
+    status: 'fail',
+    isOperational: true
+  },
+  label: 'Event Management Website',
+  timestamp: 'Nov-05-2024 03:49:15'
+}

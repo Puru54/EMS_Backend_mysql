@@ -1,4 +1,5 @@
 const Event = require('../models/eventModel');
+const { Op } = require('sequelize'); // Import Sequelize operators
 const AppError = require('../utils/appError');
 const multer = require('multer');
 // const Payment = require('../models/paymentModel');
@@ -251,25 +252,27 @@ exports.updateEventTags = async (req, res, next) => {
     }
 };
 
-// Get events by tags
 exports.getEventsByTags = async (req, res, next) => {
     try {
-        const { tag } = req.params; // Assume the tag is passed as a URL parameter
+        const tag = req.params.tag; // Assume the tag is passed as a URL parameter
         const events = await Event.findAll({
             where: {
                 tags: {
-                    [Op.like]: `%${tag}%` // Use Sequelize's Op.like for partial matching
+                    [Op.like]: `%${tag}%` // Partial match on tags
                 }
             }
         });
 
-        if (events.length === 0) {
-            return next(new AppError('No events found with this tag', 404));
+        if (!events || events.length === 0) {
+            return res.status(404).json({
+                status: 'fail',
+                message: 'No events found with this tag'
+            });
         }
 
         res.status(200).json({ status: 'success', data: events });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        next(new AppError(err.message, 500)); // Forward the error to the error handler
     }
 };
 

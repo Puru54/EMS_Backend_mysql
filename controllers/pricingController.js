@@ -3,20 +3,43 @@ const AppError = require('../utils/appError');
 const Event = require('../models/eventModel')
 
 // Create a new pricing scheme
-exports.createPricing = async (req, res) => {
+exports.createPricing = async (req, res, next) => {
     try {
-        // Check total seats validation before creating
-        await validateTotalSeats(req.body.eventID);
-
-        // Check total pricing count before creating a new pricing scheme
-        const totalPricingCount = await checkTotalPricingCount(req.body.eventID);
+        // Fetch the event to get available seats
+        const event = await Event.findByPk(req.body.eventID);
+        if (!event) {
+            return next(new AppError('Event not found', 404));
+        }
         
+        // Get all existing pricing schemes for the event
+        const pricings = await Pricing.findAll({ where: { eventID: req.body.eventID } });
+
+        // Calculate the current total seats from all existing pricing schemes
+        const currentTotalSeats = pricings.reduce((total, pricing) => total + pricing.count, 0);
+
+        // Calculate proposed total seats if adding the new pricing scheme
+        const proposedTotalSeats = currentTotalSeats + req.body.count;
+
+        // Debugging information (optional)
+        // console.log(`Event available seats: ${event.available_seats}`);
+        // console.log(`Current total seats from pricing schemes: ${currentTotalSeats}`);
+        // console.log(`Seats to be added: ${req.body.count}`);
+        // console.log(`Proposed total seats after addition: ${proposedTotalSeats}`);
+
+        // Check if adding the new pricing would exceed available seats
+        if (proposedTotalSeats > event.available_seats) {
+            // console.log('Error: Exceeds available seats. Pricing scheme creation blocked.');
+            return next(new AppError('Total seats in pricing schemes exceed available seats for the event', 400));
+        }
+
+        // Create the pricing scheme if validation passes
         const pricing = await Pricing.create(req.body);
         res.status(201).json({ data: pricing, status: 'success' });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        next(err); // Pass error to global error handling middleware
     }
 };
+
 
 // Get all pricing schemes
 exports.getAllPricings = async (req, res) => {
@@ -84,14 +107,14 @@ exports.getPricingsByEventID = async (req, res) => {
     }
 };
 
-// Validate total seats against pricing schemes
-const validateTotalSeats = async (eventId) => {
+// Validate total seats against pricing schemes, including the new one
+const validateTotalSeats = async (eventId, newPricingSeats) => {
     const event = await Event.findByPk(eventId);
     if (!event) {
         throw new AppError('Event not found', 404);
     }
     const pricings = await Pricing.findAll({ where: { eventID: eventId } });
-    const totalPricingSeats = pricings.reduce((total, pricing) => total + pricing.seats, 0);
+    const totalPricingSeats = pricings.reduce((total, pricing) => total + pricing.seats, newPricingSeats); // Add new pricing seats
     if (totalPricingSeats > event.seats) {
         throw new AppError('Total seats in pricing schemes exceed available seats for the event', 400);
     }

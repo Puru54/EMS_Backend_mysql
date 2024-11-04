@@ -73,7 +73,15 @@ const Event = db.define('Event', {
         defaultValue: 'images/banners/custom-img.jpg'
     },
     tags: {
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
+        get() {
+            const rawValue = this.getDataValue('tags');
+            return rawValue ? rawValue.split(',') : [];
+        },
+        set(value) {
+            // Check if value is an array; if so, join it, otherwise, set as-is
+            this.setDataValue('tags', Array.isArray(value) ? value.join(',') : value);
+        },
     }
 });
 
