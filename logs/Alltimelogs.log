@@ -94,3 +94,176 @@
   label: 'Event Management Website',
   timestamp: 'Nov-05-2024 03:49:15'
 }
+{
+  level: 'error',
+  message: AppError: notNull Violation: Ticket.pricingScheme cannot be null,
+  notNull Violation: Ticket.amount cannot be null,
+  notNull Violation: Ticket.ticket_identifier cannot be null
+      at exports.createTicket (E:\EMS\EMS_Backend_mysql\controllers\ticketController.js:66:46)
+      at process.processTicksAndRejections (node:internal/process/task_queues:95:5) {
+    statusCode: 500,
+    status: 'error',
+    isOperational: true
+  },
+  label: 'Event Management Website',
+  timestamp: 'Nov-05-2024 19:47:24'
+}
+{
+  level: 'error',
+  message: AppError: notNull Violation: Ticket.amount cannot be null,
+  notNull Violation: Ticket.ticket_identifier cannot be null
+      at exports.createTicket (E:\EMS\EMS_Backend_mysql\controllers\ticketController.js:66:46)
+      at process.processTicksAndRejections (node:internal/process/task_queues:95:5) {
+    statusCode: 500,
+    status: 'error',
+    isOperational: true
+  },
+  label: 'Event Management Website',
+  timestamp: 'Nov-05-2024 19:49:30'
+}
+{
+  level: 'error',
+  message: AppError: Pricing is not defined
+      at exports.createTicket (E:\EMS\EMS_Backend_mysql\controllers\ticketController.js:72:46)
+      at Layer.handle [as handle_request] (E:\EMS\EMS_Backend_mysql\node_modules\express\lib\router\layer.js:95:5)
+      at next (E:\EMS\EMS_Backend_mysql\node_modules\express\lib\router\route.js:149:13)
+      at E:\EMS\EMS_Backend_mysql\controllers\authController.js:134:9
+      at Layer.handle [as handle_request] (E:\EMS\EMS_Backend_mysql\node_modules\express\lib\router\layer.js:95:5)
+      at next (E:\EMS\EMS_Backend_mysql\node_modules\express\lib\router\route.js:149:13)
+      at next (E:\EMS\EMS_Backend_mysql\node_modules\express\lib\router\route.js:145:7)
+      at Route.dispatch (E:\EMS\EMS_Backend_mysql\node_modules\express\lib\router\route.js:119:3)
+      at Layer.handle [as handle_request] (E:\EMS\EMS_Backend_mysql\node_modules\express\lib\router\layer.js:95:5)
+      at E:\EMS\EMS_Backend_mysql\node_modules\express\lib\router\index.js:284:15 {
+    statusCode: 500,
+    status: 'error',
+    isOperational: true
+  },
+  label: 'Event Management Website',
+  timestamp: 'Nov-05-2024 20:01:37'
+}
+{
+  level: 'error',
+  message: AppError: uuidv4 is not defined
+      at exports.createTicket (E:\EMS\EMS_Backend_mysql\controllers\ticketController.js:73:46)
+      at process.processTicksAndRejections (node:internal/process/task_queues:95:5) {
+    statusCode: 500,
+    status: 'error',
+    isOperational: true
+  },
+  label: 'Event Management Website',
+  timestamp: 'Nov-05-2024 20:02:22'
+}
+{
+  level: 'error',
+  message: AppError: uuidv4 is not defined
+      at exports.createTicket (E:\EMS\EMS_Backend_mysql\controllers\ticketController.js:73:46)
+      at process.processTicksAndRejections (node:internal/process/task_queues:95:5) {
+    statusCode: 500,
+    status: 'error',
+    isOperational: true
+  },
+  label: 'Event Management Website',
+  timestamp: 'Nov-05-2024 20:02:26'
+}
+{
+  level: 'error',
+  message: AppError: uuidv4 is not defined
+      at exports.createTicket (E:\EMS\EMS_Backend_mysql\controllers\ticketController.js:73:46)
+      at process.processTicksAndRejections (node:internal/process/task_queues:95:5) {
+    statusCode: 500,
+    status: 'error',
+    isOperational: true
+  },
+  label: 'Event Management Website',
+  timestamp: 'Nov-05-2024 20:02:28'
+}
+{
+  level: 'error',
+  message: AppError: notNull Violation: Ticket.pricingScheme cannot be null
+      at exports.createTicket (E:\EMS\EMS_Backend_mysql\controllers\ticketController.js:73:46)
+      at process.processTicksAndRejections (node:internal/process/task_queues:95:5) {
+    statusCode: 500,
+    status: 'error',
+    isOperational: true
+  },
+  label: 'Event Management Website',
+  timestamp: 'Nov-05-2024 20:03:35'
+}
+{
+  level: 'error',
+  message: AppError: Pricing scheme not found
+      at exports.createTicket (E:\EMS\EMS_Backend_mysql\controllers\ticketController.js:34:25)
+      at process.processTicksAndRejections (node:internal/process/task_queues:95:5) {
+    statusCode: 400,
+    status: 'fail',
+    isOperational: true
+  },
+  label: 'Event Management Website',
+  timestamp: 'Nov-05-2024 20:04:17'
+}
+{
+  level: 'error',
+  message: SyntaxError: Expected double-quoted property name in JSON at position 117 (line 6 column 1)
+      at JSON.parse (<anonymous>)
+      at parse (E:\EMS\EMS_Backend_mysql\node_modules\body-parser\lib\types\json.js:92:19)
+      at E:\EMS\EMS_Backend_mysql\node_modules\body-parser\lib\read.js:128:18
+      at AsyncResource.runInAsyncScope (node:async_hooks:206:9)
+      at invokeCallback (E:\EMS\EMS_Backend_mysql\node_modules\raw-body\index.js:238:16)
+      at done (E:\EMS\EMS_Backend_mysql\node_modules\raw-body\index.js:227:7)
+      at IncomingMessage.onEnd (E:\EMS\EMS_Backend_mysql\node_modules\raw-body\index.js:287:7)
+      at IncomingMessage.emit (node:events:519:28)
+      at endReadableNT (node:internal/streams/readable:1696:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:82:21) {
+    expose: true,
+    statusCode: 400,
+    status: 400,
+    body: '{\r\n' +
+      '  "eventID": "44c78bfa-6059-46d3-a4da-252eabc433b2",\r\n' +
+      '  "userID": 1,\r\n' +
+      '  "ticketCount": 2,\r\n' +
+      '  "pricingScheme":45,\r\n' +
+      '}',
+    type: 'entity.parse.failed'
+  },
+  label: 'Event Management Website',
+  timestamp: 'Nov-05-2024 20:06:29'
+}
+{
+  level: 'error',
+  message: SyntaxError: Expected double-quoted property name in JSON at position 117 (line 6 column 1)
+      at JSON.parse (<anonymous>)
+      at parse (E:\EMS\EMS_Backend_mysql\node_modules\body-parser\lib\types\json.js:92:19)
+      at E:\EMS\EMS_Backend_mysql\node_modules\body-parser\lib\read.js:128:18
+      at AsyncResource.runInAsyncScope (node:async_hooks:206:9)
+      at invokeCallback (E:\EMS\EMS_Backend_mysql\node_modules\raw-body\index.js:238:16)
+      at done (E:\EMS\EMS_Backend_mysql\node_modules\raw-body\index.js:227:7)
+      at IncomingMessage.onEnd (E:\EMS\EMS_Backend_mysql\node_modules\raw-body\index.js:287:7)
+      at IncomingMessage.emit (node:events:519:28)
+      at endReadableNT (node:internal/streams/readable:1696:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:82:21) {
+    expose: true,
+    statusCode: 400,
+    status: 400,
+    body: '{\r\n' +
+      '  "eventID": "44c78bfa-6059-46d3-a4da-252eabc433b2",\r\n' +
+      '  "userID": 1,\r\n' +
+      '  "ticketCount": 1,\r\n' +
+      '  "pricingScheme":45,\r\n' +
+      '}',
+    type: 'entity.parse.failed'
+  },
+  label: 'Event Management Website',
+  timestamp: 'Nov-05-2024 20:06:47'
+}
+{
+  level: 'error',
+  message: AppError: Total seats in pricing schemes exceed available seats for the event
+      at exports.createPricing (E:\EMS\EMS_Backend_mysql\controllers\pricingController.js:32:25)
+      at process.processTicksAndRejections (node:internal/process/task_queues:95:5) {
+    statusCode: 400,
+    status: 'fail',
+    isOperational: true
+  },
+  label: 'Event Management Website',
+  timestamp: 'Nov-05-2024 20:28:56'
+}

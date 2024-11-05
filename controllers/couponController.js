@@ -1,5 +1,6 @@
 const Coupon = require('../models/couponModel');
 const AppError = require('../utils/appError');
+const Pricing = require('../models/priceModel')
 const { v4: uuidv4 } = require('uuid'); // For generating random event IDs
 
 // Create a new coupon
@@ -104,23 +105,37 @@ exports.applyCoupon = async (req, res, next) => {
     }
 };
 
-
-const randomFloat = (min, max) => (Math.random() * (max - min) + min).toFixed(2);
-
-exports.generateCoupons = async (req, res) => {
+// Generate multiple coupons
+exports.generateCoupons = async (req, res, next) => {
     try {
-        const { count } = req.body;
+        const { count, pricingId } = req.body;
 
+        // Fetch the pricing model and validate available coupon count
+        const pricing = await Pricing.findByPk(pricingId);
+        if (!pricing) {
+            return next(new AppError('Pricing model not found', 404));
+        }
+
+        // Get the current count of coupons for this pricing model
+        const existingCouponsCount = await Coupon.count({ where: { pricingId } });
+
+        // Check if generating more coupons would exceed the pricing count limit
+        if (existingCouponsCount + count > pricing.count) {
+            return next(new AppError(`Cannot generate ${count} coupons. It would exceed the limit of ${pricing.count} for this pricing model.`, 400));
+        }
+
+        // Generate coupon data
         const couponsData = Array.from({ length: count }, () => ({
             code: `COUPON-${Math.random().toString(36).substr(2, 8).toUpperCase()}`, // Random code
-            discount: parseFloat(req.body.discount), // Random discount between 5 and 50
-            type: req.body.type, // Random type
-            eventID: uuidv4(), // Random UUID for eventID
-            pricingId: req.body.pricingId, // Random pricingId (assumes 1 to 100 as placeholder)
-            usageLimit: req.body.usageLimit, // Random usage limit between 1 and 5
+            discount: parseFloat(req.body.discount), // Discount passed from the request
+            type: req.body.type, // Type passed from the request
+            eventID: req.body.eventID, // Random UUID for eventID
+            pricingId, // Associate with the provided pricingId
+            usageLimit: req.body.usageLimit, // Usage limit passed from the request
             timesUsed: 0, // Initialize with zero
         }));
 
+        // Bulk create the coupons
         const coupons = await Coupon.bulkCreate(couponsData);
 
         res.status(201).json({ data: coupons, status: 'success', message: `${count} coupons generated successfully` });

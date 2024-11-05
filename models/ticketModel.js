@@ -4,6 +4,8 @@ const Event = require('./eventModel');
 const User = require('./userModel');
 const Pricing = require('./priceModel');
 const Coupon = require('./couponModel'); // Import Coupon model
+const { v4: uuidv4 } = require('uuid'); // Import UUID generator
+
 
 // Define Ticket model
 const Ticket = db.define('Ticket', {
@@ -29,7 +31,11 @@ const Ticket = db.define('Ticket', {
         allowNull: false,
     },
     pricingScheme: {
-        type: DataTypes.STRING,
+        type: DataTypes.BIGINT,
+        references: {
+            model: Pricing,
+            key: 'pricingId',
+        },
         allowNull: false,
     },
     amount: {
@@ -48,6 +54,7 @@ const Ticket = db.define('Ticket', {
         type: DataTypes.STRING,
         allowNull: false,
         unique: true, // Enforce uniqueness
+        defaultValue: () => uuidv4(), // Generate a UUID as default
     },
     cancel_validity: {
         type: DataTypes.DATE,

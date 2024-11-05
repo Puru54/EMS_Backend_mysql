@@ -2,6 +2,7 @@ const Ticket = require('../models/ticketModel');
 const Coupon = require('../models/couponModel');
 const Event = require('../models/eventModel');
 const AppError = require('../utils/appError');
+const Pricing = require('../models/priceModel')
 
 // Helper function to check max purchase limit for tickets
 const checkMaxPurchaseLimit = async (eventID, userID, requestedTickets) => {
@@ -25,7 +26,14 @@ const checkMaxPurchaseLimit = async (eventID, userID, requestedTickets) => {
 // Create a new ticket
 exports.createTicket = async (req, res, next) => {
     try {
-        const { couponCode, eventID, userID, ticketCount = 1 } = req.body;
+        const { couponCode, eventID, userID, ticketCount = 1, pricingScheme } = req.body;
+
+        // Get price from Pricing model using priceID
+        const pricing = await Pricing.findByPk(pricingScheme);
+        if (!pricing) {
+            return next(new AppError('Pricing scheme not found', 400));
+        }
+        let finalPrice = pricing.price;
 
         // Check if the coupon code is valid (if provided)
         let coupon = null;
@@ -34,6 +42,16 @@ exports.createTicket = async (req, res, next) => {
             if (!coupon) {
                 return next(new AppError('Invalid or expired coupon code', 400));
             }
+
+            // Apply discount based on coupon type
+            if (coupon.type === 'percentage') {
+                finalPrice -= (finalPrice * coupon.discount) / 100;
+            } else if (coupon.type === 'fixed') {
+                finalPrice -= coupon.discount;
+            }
+
+            // Ensure final price is not below zero
+            finalPrice = Math.max(0, finalPrice);
         }
 
         // Check max purchase limit
@@ -41,7 +59,13 @@ exports.createTicket = async (req, res, next) => {
 
         // Create the tickets based on ticketCount
         const tickets = await Promise.all(
-            Array(ticketCount).fill().map(() => Ticket.create(req.body))
+            Array(ticketCount).fill().map(() => 
+                Ticket.create({
+                    ...req.body,
+                    amount: finalPrice, // Use the final price after applying coupon if applicable
+                    pricingScheme,
+                })
+            )
         );
 
         res.status(201).json({ data: tickets, status: 'success' });
