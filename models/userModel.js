@@ -11,7 +11,7 @@ const User = db.define('User', {
   },
   cid: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,
     unique: true, // Ensure 'cid' is unique but not the primary key
   },
   name: {
@@ -29,15 +29,15 @@ const User = db.define('User', {
   phonenumber: {
     type: DataTypes.STRING,
     unique: true,
-    allowNull: false,
+    allowNull: true,
   },
   address: {
     type: DataTypes.TEXT,
-    allowNull: false,
+    allowNull: true,
   },
   nationality: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,
   },
   photo: {
     type: DataTypes.STRING,

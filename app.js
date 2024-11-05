@@ -11,7 +11,7 @@ const app = express();
 // Middleware configurations
 app.use(express.static(path.join(__dirname, 'views')));
 app.use(cors({
-  origin: 'https://emsverify.wonstechnology.com'  
+  origin: 'http://localhost:5173'
 }));
 app.use(cookieParser());
 app.use(express.json());
