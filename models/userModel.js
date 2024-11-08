@@ -83,12 +83,10 @@ const User = db.define('User', {
     beforeCreate: async (user) => {
       // Hash the password
       user.password = await bcrypt.hash(user.password, 12);
-      user.passwordConfirm = await bcrypt.hash(user.passwordConfirm, 12);
     },
     beforeUpdate: async (user) => {
       if (user.changed('password')) {
         user.password = await bcrypt.hash(user.password, 12);
-        user.passwordConfirm = await bcrypt.hash(user.passwordConfirm, 12);
       }
     },
   },

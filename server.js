@@ -9,7 +9,7 @@ const db = require('./models/db');
 /* Test DB connection */
 db.authenticate()
   .then(() => console.log('MySQL connected'))
-  .catch(err => console.log('Error:In starting mysql ' + err));
+  .catch(err => console.log('Error: ' + err));
 
 /* Starting the server on port 4001 */
 const port = process.env.PORT || 4001;

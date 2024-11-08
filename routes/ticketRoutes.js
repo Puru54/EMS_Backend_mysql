@@ -8,8 +8,8 @@ router.use(authController.protect);
 
 router
     .route('/')
-    .get(ticketController.getAllTickets) // Get all tickets
-    .post(authController.restrictTo('admin', 'eventmanager'), ticketController.createTicket); // Create a new ticket (restricted)
+    // .get(ticketController.getAllTickets) // Get all tickets
+    .post(ticketController.createTicket); // Create a new ticket (restricted)
 
 router
     .route('/:id')

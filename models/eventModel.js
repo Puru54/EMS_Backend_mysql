@@ -82,8 +82,23 @@ const Event = db.define('Event', {
             // Check if value is an array; if so, join it, otherwise, set as-is
             this.setDataValue('tags', Array.isArray(value) ? value.join(',') : value);
         },
-    }
-});
+    },
+},{
+        defaultScope: {
+            attributes: { exclude: ['event_regulations', 'tags'] },
+        },
+        scopes: {
+            withDetails: { attributes: {} },
+            activeEvents: { where: { status: 'active' } },
+            upcomingEvents: { where: { start_Date: { [db.Sequelize.Op.gte]: new Date() } } },
+        },
+        indexes: [
+            { fields: ['eventName'] },
+            { fields: ['eventType'] },
+            { fields: ['start_Date'] },
+            { fields: ['end_Date'] },
+        ],
+    });
 
 // Establish relationship with User model
 Event.belongsTo(User, {
