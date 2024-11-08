@@ -18,6 +18,9 @@ const Coupon = db.define('Coupon', {
     discount: {
         type: DataTypes.FLOAT,
         allowNull: false,
+        validate: {
+            min: 0, // Ensures discount is non-negative
+        },
     },
     type: {
         type: DataTypes.ENUM('percentage', 'fixed'),
@@ -42,13 +45,25 @@ const Coupon = db.define('Coupon', {
     usageLimit: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        defaultValue: 1, // Set a default usage limit
+        defaultValue: 1, 
+        validate: {
+            min: 1, // Ensures usageLimit is non-negative
+        },
     },
     timesUsed: {
         type: DataTypes.INTEGER,
-        allowNull: false,
+        allowNull: true,
         defaultValue: 0, // Start with zero usages
     }
+}, {
+    scopes: {
+        availableCoupons: { where: { usageLimit: { [db.Sequelize.Op.gt]: db.Sequelize.col('timesUsed') } } }, // Scope to get coupons that can still be used
+    },
+    indexes: [
+        { fields: ['eventID'] },
+        { fields: ['pricingId'] },
+        { fields: ['code'] },
+    ],
 });
 
 // Sync database if 'Coupons' table doesn't exist or requires alteration

@@ -80,6 +80,16 @@ const Ticket = db.define('Ticket', {
             }
         }
     }
+}, {
+    scopes: {
+        activeTickets: { where: { ticket_validity: { [db.Sequelize.Op.gte]: new Date() } } },
+    },
+    indexes: [
+        { fields: ['userID'] },
+        { fields: ['eventID'] },
+        { fields: ['pricingScheme'] },
+        { fields: ['couponCode'] },
+    ],
 });
 
 // Sync database if 'Tickets' table doesn't exist or requires alteration

@@ -1,0 +1,24 @@
+{
+  level: 'error',
+  message: AppError: Pricing scheme not found
+      at exports.createTicket (E:\EMS\EMS_Backend_mysql\controllers\ticketController.js:52:25)
+      at process.processTicksAndRejections (node:internal/process/task_queues:95:5) {
+    statusCode: 400,
+    status: 'fail',
+    isOperational: true
+  },
+  label: 'Event Management Website',
+  timestamp: 'Nov-09-2024 00:13:35'
+}
+{
+  level: 'error',
+  message: AppError: Cannot add or update a child row: a foreign key constraint fails (`master_db`.`Tickets`, CONSTRAINT `Tickets_ibfk_13` FOREIGN KEY (`userID`) REFERENCES `Users` (`uid`))
+      at exports.createTicket (E:\EMS\EMS_Backend_mysql\controllers\ticketController.js:75:46)
+      at process.processTicksAndRejections (node:internal/process/task_queues:95:5) {
+    statusCode: 500,
+    status: 'error',
+    isOperational: true
+  },
+  label: 'Event Management Website',
+  timestamp: 'Nov-09-2024 00:14:26'
+}

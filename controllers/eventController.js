@@ -40,14 +40,10 @@ exports.uploadEventBanner = upload.single('photo');
 // Function to handle image upload and return image URL
 exports.uploadEventImage = async (req, res, next) => {
     try {
-
-        console.log('File:', req.file);
-        console.log('Event ID:', req.body.eventid);
         const imageUrl = 'images/banners/user_uploads/' + req.file.filename;
         const event = await Event.findByPk(req.body.eventid);
         event.media_Links = imageUrl;
         await event.save();
-
         res.json({ data: event, status: "success" });
     } catch (err) {
         res.status(500).json({ error: err.message });

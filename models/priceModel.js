@@ -24,6 +24,9 @@ const Pricing = db.define('Pricing', {
     price: {
         type: DataTypes.FLOAT,
         allowNull: false,
+        validate: {
+            min: 0, // Ensures price is non-negative
+        },
     },
     currency: {
         type: DataTypes.STRING,
@@ -36,11 +39,26 @@ const Pricing = db.define('Pricing', {
         type: DataTypes.INTEGER,
         allowNull: false,
         defaultValue: 0,
+        validate: {
+            min: 1, // Ensures count is non-negative
+        },
     },
     condition: {
         type: DataTypes.STRING,
         allowNull: true,
     }
+}, {
+    defaultScope: {
+        attributes: { exclude: ['description'] }, // Exclude description by default
+    },
+    scopes: {
+        withDescription: { attributes: {} }, // Scope to include description
+        activePricing: { where: { count: { [db.Sequelize.Op.gt]: 0 } } }, // Scope for entries with available count
+    },
+    indexes: [
+        { fields: ['eventID'] },
+        { fields: ['pricingSchemeName'] },
+    ],
 });
 
 // Establish relationship with Event model

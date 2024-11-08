@@ -1,25 +1,24 @@
 const Coupon = require('../models/couponModel');
 const AppError = require('../utils/appError');
-const Pricing = require('../models/priceModel')
-const { v4: uuidv4 } = require('uuid'); // For generating random event IDs
+const Pricing = require('../models/priceModel');
 
 // Create a new coupon
-exports.createCoupon = async (req, res) => {
+exports.createCoupon = async (req, res, next) => {
     try {
         const coupon = await Coupon.create(req.body);
-        res.status(201).json({ data: coupon, status: 'success' });
+        res.status(201).json({ status: 'success', data: coupon });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        next(err);
     }
 };
 
 // Get all coupons
-exports.getAllCoupons = async (req, res) => {
+exports.getAllCoupons = async (req, res, next) => {
     try {
         const coupons = await Coupon.findAll();
-        res.status(200).json({ data: coupons, status: 'success' });
+        res.status(200).json({ status: 'success', data: coupons });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        next(err);
     }
 };
 
@@ -32,53 +31,54 @@ exports.getCoupon = async (req, res, next) => {
         }
         res.status(200).json({ status: 'success', data: coupon });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        next(err);
     }
 };
 
 // Update a coupon by ID
 exports.updateCoupon = async (req, res, next) => {
     try {
-        const coupon = await Coupon.update(req.body, {
+        const [updatedCount, updatedCoupons] = await Coupon.update(req.body, {
             where: { couponId: req.params.id },
             returning: true,
         });
 
-        if (coupon[0] === 0) {
+        if (updatedCount === 0) {
             return next(new AppError('Coupon not found', 404));
         }
 
-        res.status(200).json({ status: 'success', data: { coupon: coupon[1][0] } });
+        res.status(200).json({ status: 'success', data: updatedCoupons[0] });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        next(err);
     }
 };
 
 // Delete a coupon by ID
 exports.deleteCoupon = async (req, res, next) => {
     try {
-        const coupon = await Coupon.destroy({ where: { couponId: req.params.id } });
+        const deletedCount = await Coupon.destroy({ where: { couponId: req.params.id } });
 
-        if (!coupon) {
+        if (deletedCount === 0) {
             return next(new AppError('Coupon not found', 404));
         }
 
-        res.status(200).json({ status: 'success', data: { status: 'Coupon deleted successfully' } });
+        res.status(200).json({ status: 'success', message: 'Coupon deleted successfully' });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        next(err);
     }
 };
 
 // Get all coupons for a specific event
-exports.getCouponsByEventID = async (req, res) => {
+exports.getCouponsByEventID = async (req, res, next) => {
     try {
         const coupons = await Coupon.findAll({ where: { eventID: req.params.eventID } });
-        res.status(200).json({ data: coupons, status: 'success' });
+        res.status(200).json({ status: 'success', data: coupons });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        next(err);
     }
 };
 
+// Apply a coupon
 exports.applyCoupon = async (req, res, next) => {
     try {
         const { couponId } = req.params;
@@ -98,48 +98,48 @@ exports.applyCoupon = async (req, res, next) => {
         // Increment the timesUsed field by 1
         await coupon.increment('timesUsed');
 
-        // Proceed with applying the coupon (e.g., applying discount logic here)
         res.status(200).json({ status: 'success', message: 'Coupon applied successfully', data: coupon });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        next(err);
+    }
+};
+
+// Helper to validate coupon limit against the pricing model
+const validateCouponLimit = async (pricingId, requestedCount) => {
+    const pricing = await Pricing.findByPk(pricingId);
+    if (!pricing) {
+        throw new AppError('Pricing model not found', 404);
+    }
+    const existingCouponsCount = await Coupon.count({ where: { pricingId } });
+    if (existingCouponsCount + requestedCount > pricing.count) {
+        throw new AppError(`Cannot generate ${requestedCount} coupons. Exceeds limit of ${pricing.count} for this pricing model.`, 400);
     }
 };
 
 // Generate multiple coupons
 exports.generateCoupons = async (req, res, next) => {
     try {
-        const { count, pricingId } = req.body;
+        const { count, pricingId, discount, type, eventID, usageLimit } = req.body;
 
-        // Fetch the pricing model and validate available coupon count
-        const pricing = await Pricing.findByPk(pricingId);
-        if (!pricing) {
-            return next(new AppError('Pricing model not found', 404));
-        }
-
-        // Get the current count of coupons for this pricing model
-        const existingCouponsCount = await Coupon.count({ where: { pricingId } });
-
-        // Check if generating more coupons would exceed the pricing count limit
-        if (existingCouponsCount + count > pricing.count) {
-            return next(new AppError(`Cannot generate ${count} coupons. It would exceed the limit of ${pricing.count} for this pricing model.`, 400));
-        }
+        // Validate coupon limit
+        await validateCouponLimit(pricingId, count);
 
         // Generate coupon data
         const couponsData = Array.from({ length: count }, () => ({
-            code: `COUPON-${Math.random().toString(36).substr(2, 8).toUpperCase()}`, // Random code
-            discount: parseFloat(req.body.discount), // Discount passed from the request
-            type: req.body.type, // Type passed from the request
-            eventID: req.body.eventID, // Random UUID for eventID
-            pricingId, // Associate with the provided pricingId
-            usageLimit: req.body.usageLimit, // Usage limit passed from the request
-            timesUsed: 0, // Initialize with zero
+            code: `COUPON-${Math.random().toString(36).substr(2, 8).toUpperCase()}`,
+            discount: parseFloat(discount),
+            type,
+            eventID,
+            pricingId,
+            usageLimit,
+            timesUsed: 0,
         }));
 
         // Bulk create the coupons
         const coupons = await Coupon.bulkCreate(couponsData);
 
-        res.status(201).json({ data: coupons, status: 'success', message: `${count} coupons generated successfully` });
+        res.status(201).json({ status: 'success', message: `${count} coupons generated successfully`, data: coupons });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        next(err);
     }
 };

@@ -2,25 +2,43 @@ const Ticket = require('../models/ticketModel');
 const Coupon = require('../models/couponModel');
 const Event = require('../models/eventModel');
 const AppError = require('../utils/appError');
-const Pricing = require('../models/priceModel')
+const Pricing = require('../models/priceModel');
 
 // Helper function to check max purchase limit for tickets
 const checkMaxPurchaseLimit = async (eventID, userID, requestedTickets) => {
-    // Retrieve the event and its max_purchase limit
     const event = await Event.findByPk(eventID);
-
     if (!event) throw new AppError('Event not found', 404);
 
-    // Check how many tickets the user has already purchased for this event
+    // Check the user's existing ticket count for the event
     const existingTickets = await Ticket.count({ where: { eventID, userID } });
-
-    // Check if the total exceeds the max_purchase limit
     if (existingTickets + requestedTickets > event.max_purchase) {
-        throw new AppError(
-            `Cannot purchase more than ${event.max_purchase} tickets for this event.`,
-            400
-        );
+        throw new AppError(`Cannot purchase more than ${event.max_purchase} tickets for this event.`, 400);
     }
+};
+
+// Helper function to calculate final price after applying coupon
+const applyCouponDiscount = async (couponCode, eventID, basePrice) => {
+    // If no coupon code is provided, return the base price directly
+    if (!couponCode) return basePrice;
+
+    const coupon = await Coupon.findOne({ where: { code: couponCode, eventID } });
+    if (!coupon) throw new AppError('Invalid or expired coupon code', 400);
+
+    // Apply discount based on the coupon type
+    let finalPrice = basePrice;
+    if (coupon.type === 'percentage') {
+        finalPrice -= (finalPrice * coupon.discount) / 100;
+    } else if (coupon.type === 'fixed') {
+        finalPrice -= coupon.discount;
+    }
+
+    // Ensure final price is not below zero
+    finalPrice = Math.max(0, finalPrice);
+
+    // Increment timesUsed for the coupon
+    await coupon.increment('timesUsed');
+
+    return finalPrice;
 };
 
 // Create a new ticket
@@ -28,59 +46,43 @@ exports.createTicket = async (req, res, next) => {
     try {
         const { couponCode, eventID, userID, ticketCount = 1, pricingScheme } = req.body;
 
-        // Get price from Pricing model using priceID
+        // Get price from Pricing model using pricingScheme ID
         const pricing = await Pricing.findByPk(pricingScheme);
         if (!pricing) {
             return next(new AppError('Pricing scheme not found', 400));
         }
-        let finalPrice = pricing.price;
+        const basePrice = pricing.price;
 
-        // Check if the coupon code is valid (if provided)
-        let coupon = null;
-        if (couponCode) {
-            coupon = await Coupon.findOne({ where: { code: couponCode, eventID } });
-            if (!coupon) {
-                return next(new AppError('Invalid or expired coupon code', 400));
-            }
-
-            // Apply discount based on coupon type
-            if (coupon.type === 'percentage') {
-                finalPrice -= (finalPrice * coupon.discount) / 100;
-            } else if (coupon.type === 'fixed') {
-                finalPrice -= coupon.discount;
-            }
-
-            // Ensure final price is not below zero
-            finalPrice = Math.max(0, finalPrice);
-        }
+        // Calculate final price after applying coupon discount (if applicable)
+        const finalPrice = await applyCouponDiscount(couponCode, eventID, basePrice);
 
         // Check max purchase limit
         await checkMaxPurchaseLimit(eventID, userID, ticketCount);
 
-        // Create the tickets based on ticketCount
+        // Create tickets based on ticketCount
         const tickets = await Promise.all(
-            Array(ticketCount).fill().map(() => 
+            Array.from({ length: ticketCount }, () =>
                 Ticket.create({
                     ...req.body,
-                    amount: finalPrice, // Use the final price after applying coupon if applicable
+                    amount: finalPrice,
                     pricingScheme,
                 })
             )
         );
 
-        res.status(201).json({ data: tickets, status: 'success' });
+        res.status(201).json({ status: 'success', data: tickets });
     } catch (err) {
         next(err instanceof AppError ? err : new AppError(err.message, 500));
     }
 };
 
 // Get all tickets
-exports.getAllTickets = async (req, res) => {
+exports.getAllTickets = async (req, res, next) => {
     try {
         const tickets = await Ticket.findAll();
-        res.status(200).json({ data: tickets, status: 'success' });
+        res.status(200).json({ status: 'success', data: tickets });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        next(err);
     }
 };
 
@@ -93,49 +95,49 @@ exports.getTicket = async (req, res, next) => {
         }
         res.status(200).json({ status: 'success', data: ticket });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        next(err);
     }
 };
 
 // Update a ticket by ID
 exports.updateTicket = async (req, res, next) => {
     try {
-        const ticket = await Ticket.update(req.body, {
+        const [updatedCount, updatedTickets] = await Ticket.update(req.body, {
             where: { ticketID: req.params.id },
             returning: true,
         });
 
-        if (ticket[0] === 0) {
+        if (updatedCount === 0) {
             return next(new AppError('Ticket not found', 404));
         }
 
-        res.status(200).json({ status: 'success', data: { ticket: ticket[1][0] } });
+        res.status(200).json({ status: 'success', data: updatedTickets[0] });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        next(err);
     }
 };
 
 // Delete a ticket by ID
 exports.deleteTicket = async (req, res, next) => {
     try {
-        const ticket = await Ticket.destroy({ where: { ticketID: req.params.id } });
+        const deletedCount = await Ticket.destroy({ where: { ticketID: req.params.id } });
 
-        if (!ticket) {
+        if (deletedCount === 0) {
             return next(new AppError('Ticket not found', 404));
         }
 
-        res.status(200).json({ status: 'success', data: { status: 'Ticket deleted successfully' } });
+        res.status(200).json({ status: 'success', message: 'Ticket deleted successfully' });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        next(err);
     }
 };
 
 // Get all tickets for a specific event
-exports.getTicketsByEventID = async (req, res) => {
+exports.getTicketsByEventID = async (req, res, next) => {
     try {
         const tickets = await Ticket.findAll({ where: { eventID: req.params.eventID } });
-        res.status(200).json({ data: tickets, status: 'success' });
+        res.status(200).json({ status: 'success', data: tickets });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        next(err);
     }
 };
